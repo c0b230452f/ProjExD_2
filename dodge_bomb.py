@@ -1,4 +1,5 @@
 import os
+import random
 import sys
 import pygame as pg
 
@@ -16,10 +17,20 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
+    # ----- 背景 -----
     bg_img = pg.image.load("fig/pg_bg.jpg")    
+    # ----- こうかとん -----
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
+    # ----- 爆弾 -----
+    bb_img = pg.Surface((20, 20))  # 空のsurface
+    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
+    bb_img.set_colorkey((0,0,0))  # 爆弾の余白を透過
+    bb_rct = bb_img.get_rect()  # 爆弾Rectの抽出
+    bb_rct.center = random.randint(0, WIDTH),\
+                    random.randint(0, HEIGHT)  # 爆弾の初期座標を乱数で設定
+    vx, vy = +5, +5
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -27,7 +38,6 @@ def main():
             if event.type == pg.QUIT: 
                 return
         screen.blit(bg_img, [0, 0]) 
-
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]  # 横方向, 縦方向
         # if key_lst[pg.K_UP]:
@@ -44,6 +54,8 @@ def main():
                 sum_mv[1] += tpl[1]  # 縦方向
         kk_rct.move_ip(sum_mv)
         screen.blit(kk_img, kk_rct)
+        bb_rct.move_ip(vx, vy)
+        screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
         clock.tick(50)
