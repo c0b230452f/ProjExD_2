@@ -13,6 +13,18 @@ DELTA = {
         }  # pythonは最後の要素にカンマがあってもエラーにはならない
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
+    """
+    引数：こうかとん または 爆弾のRect
+    戻り値：真理値タプル（横判定結果, 縦判定結果）
+    画面内ならTrue, 画面外ならFalse
+    """
+    w, h = True, True
+    if obj_rct.left < 0 or WIDTH < obj_rct.right:
+        w = False
+    if obj_rct.top < 0 or HEIGHT < obj_rct.bottom:
+        h = False
+    return (w, h)
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -38,6 +50,7 @@ def main():
             if event.type == pg.QUIT: 
                 return
         screen.blit(bg_img, [0, 0]) 
+        # ----- こうかとんの移動 -----
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]  # 横方向, 縦方向
         # if key_lst[pg.K_UP]:
@@ -53,8 +66,19 @@ def main():
                 sum_mv[0] += tpl[0]  # 横方向
                 sum_mv[1] += tpl[1]  # 縦方向
         kk_rct.move_ip(sum_mv)
+        # こうかとんが画面外へ行かないようにする
+        if check_bound(kk_rct) != (True, True):
+            kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
+            # 直前のmove_ipを打ち消す
         screen.blit(kk_img, kk_rct)
+        # ----- 爆弾の移動 -----
         bb_rct.move_ip(vx, vy)
+        # 爆弾を画面の端でバウンドさせる
+        (w, h) = check_bound(bb_rct)
+        if not w:
+            vx *= -1
+        if not h:
+            vy *= -1
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
