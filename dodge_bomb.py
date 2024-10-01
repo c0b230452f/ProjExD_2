@@ -50,6 +50,11 @@ def main():
             if event.type == pg.QUIT: 
                 return
         screen.blit(bg_img, [0, 0]) 
+        # ----- 衝突判定 -----
+        if kk_rct.colliderect(bb_rct):
+            # こうかとんと爆弾が重なっていたら終了
+            # print("GAME OVER")
+            return
         # ----- こうかとんの移動 -----
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]  # 横方向, 縦方向
