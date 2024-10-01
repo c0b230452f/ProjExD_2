@@ -5,13 +5,18 @@ import pygame as pg
 
 
 WIDTH, HEIGHT = 1100, 650
+
+
 DELTA = {
-        pg.K_UP:(0, -5),
-        pg.K_DOWN:(0, 5),
-        pg.K_LEFT:(-5, 0),
-        pg.K_RIGHT:(5,0),
-        }  # pythonは最後の要素にカンマがあってもエラーにはならない
+    pg.K_UP:(0, -5),
+    pg.K_DOWN:(0, 5),
+    pg.K_LEFT:(-5, 0),
+    pg.K_RIGHT:(5,0),
+}  # pythonは最後の要素にカンマがあってもエラーにはならない
+
+
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     """
@@ -26,6 +31,7 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
         h = False
     return (w, h)
 
+
 def sleep(n:int):
     """
     引数：表示させたい時間
@@ -34,6 +40,7 @@ def sleep(n:int):
     """
     pg.time.wait(n*1000)
 
+
 def change_tuple(lst:list) -> tuple:
     """
     引数：加速度や拡大爆弾Surfaceのリスト
@@ -41,6 +48,7 @@ def change_tuple(lst:list) -> tuple:
     リストをタプルに変換する
     """
     return tuple(lst)
+
 
 def facing(lst:list) -> dict:
     """
@@ -60,6 +68,7 @@ def facing(lst:list) -> dict:
         (5, 5):pg.transform.rotozoom(pg.image.load("fig/3.png"), 45, 0.9),
     }
     return face_dct[tuple(lst)]
+
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -90,9 +99,9 @@ def main():
     # bb_img = pg.Surface((20, 20))  # 空のsurface
     # pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
     # bb_img.set_colorkey((0,0,0))  # 爆弾の余白を透過
-    vx, vy = +5, +5
+    vx, vy = +5, +5  # 基本移動速度
     accs= [a for a in range(1, 11)]  # 加速度のリスト
-    imgs = []
+    imgs = []  # 空リスト
     for r in range(1, 11):
         img = pg.Surface((20*r, 20*r))
         pg.draw.circle(img, (255, 0, 0), (10*r, 10*r), 10*r)
@@ -101,7 +110,7 @@ def main():
         rct.center = random.randint(0, WIDTH),\
                      random.randint(0, HEIGHT)
                      # 爆弾の初期座標を乱数で設定
-        imgs.append(img)
+        imgs.append(img)  # 爆弾をリストに格納
     bb_accs = change_tuple(accs)  # 加速度のタプル
     bb_imgs = change_tuple(imgs)  # 拡大爆弾のタプル
     bb_img = bb_imgs[0]  # 爆弾初期値
@@ -158,6 +167,7 @@ def main():
         bb_rct.move_ip(avx, avy)
         # bb_rct.move_ip(vx, vy)
         screen.blit(bb_img, bb_rct)
+        
         pg.display.update()
         tmr += 1
         clock.tick(50)
