@@ -26,15 +26,39 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
         h = False
     return (w, h)
 
+def sleep(n:int):
+    """
+    引数：表示させたい時間
+    戻り値：なし
+    こうかとんと爆弾の衝突時、5秒間プログラムを停止させる
+    """
+    pg.time.wait(n*1000)
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     # ----- 背景 -----
-    bg_img = pg.image.load("fig/pg_bg.jpg")    
+    bg_img = pg.image.load("fig/pg_bg.jpg")
     # ----- こうかとん -----
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
+    # ----- ブラックアウト -----
+    bo_img = pg.Surface((WIDTH, HEIGHT))
+    pg.draw.rect(bo_img, (0, 0, 0), (0, 0, WIDTH, HEIGHT))
+    bo_img.set_alpha(200)
+    # ----- メッセージ -----
+    msg = pg.font.Font(None, 80)
+    txt = msg.render("Game Over", True, (255, 255, 255))
+    txt_rct = txt.get_rect()
+    txt_rct.center = WIDTH//2, HEIGHT//2
+    # ----- こうかとん -----
+    kk2_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9)
+    kk2_rct = kk2_img.get_rect()
+    kk2_rct.center = WIDTH//3, HEIGHT//2
+    kk3_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9)
+    kk3_rct = kk3_img.get_rect()
+    kk3_rct.center = (WIDTH//3)*2, HEIGHT//2
     # ----- 爆弾 -----
     bb_img = pg.Surface((20, 20))  # 空のsurface
     pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
@@ -42,7 +66,7 @@ def main():
     bb_rct = bb_img.get_rect()  # 爆弾Rectの抽出
     bb_rct.center = random.randint(0, WIDTH),\
                     random.randint(0, HEIGHT)  # 爆弾の初期座標を乱数で設定
-    vx, vy = +5, +5
+    vx, vy = +5, +5 
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -53,7 +77,12 @@ def main():
         # ----- 衝突判定 -----
         if kk_rct.colliderect(bb_rct):
             # こうかとんと爆弾が重なっていたら終了
-            # print("GAME OVER")
+            screen.blit(bo_img, [0,0])  # ブラックアウトさせる
+            screen.blit(kk2_img, kk2_rct)
+            screen.blit(txt, txt_rct)
+            screen.blit(kk3_img, kk3_rct)
+            pg.display.flip()
+            sleep(5)
             return
         # ----- こうかとんの移動 -----
         key_lst = pg.key.get_pressed()
@@ -78,6 +107,7 @@ def main():
         screen.blit(kk_img, kk_rct)
         # ----- 爆弾の移動 -----
         bb_rct.move_ip(vx, vy)
+
         # 爆弾を画面の端でバウンドさせる
         (w, h) = check_bound(bb_rct)
         if not w:
