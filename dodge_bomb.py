@@ -87,26 +87,27 @@ def main():
     kk3_rct = kk3_img.get_rect()
     kk3_rct.center = (WIDTH//3)*2, HEIGHT//2
     # ----- 爆弾 -----
-    bb_img = pg.Surface((20, 20))  # 空のsurface
-    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
-    bb_img.set_colorkey((0,0,0))  # 爆弾の余白を透過
+    # bb_img = pg.Surface((20, 20))  # 空のsurface
+    # pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
+    # bb_img.set_colorkey((0,0,0))  # 爆弾の余白を透過
+    vx, vy = +5, +5
+    accs= [a for a in range(1, 11)]  # 加速度のリスト
+    imgs = []
+    for r in range(1, 11):
+        img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(img, (255, 0, 0), (10*r, 10*r), 10*r)
+        img.set_colorkey((0,0,0))  # 爆弾の余白を透過
+        rct = img.get_rect()  # 爆弾Rectの抽出
+        rct.center = random.randint(0, WIDTH),\
+                     random.randint(0, HEIGHT)
+                     # 爆弾の初期座標を乱数で設定
+        imgs.append(img)
+    bb_accs = change_tuple(accs)  # 加速度のタプル
+    bb_imgs = change_tuple(imgs)  # 拡大爆弾のタプル
+    bb_img = bb_imgs[0]  # 爆弾初期値
     bb_rct = bb_img.get_rect()  # 爆弾Rectの抽出
     bb_rct.center = random.randint(0, WIDTH),\
                     random.randint(0, HEIGHT)  # 爆弾の初期座標を乱数で設定
-    vx, vy = +5, +5 
-    # accs= [a for a in range(1, 11)]  # 加速度のリスト
-    # imgs = []
-    # for r in range(1, 11):
-    #     bb_img = pg.Surface((20*r, 20*r))
-    #     pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
-    #     bb_img.set_colorkey((0,0,0))  # 爆弾の余白を透過
-    #     bb_rct = bb_img.get_rect()  # 爆弾Rectの抽出
-    #     bb_rct.center = random.randint(0, WIDTH),\
-    #                     random.randint(0, HEIGHT)
-    #                     # 爆弾の初期座標を乱数で設定
-    #     imgs.append(bb_img)
-    # bb_accs = change_tuple(accs)
-    # bb_imgs = change_tuple(imgs)
 
     clock = pg.time.Clock()
     tmr = 0
@@ -128,21 +129,14 @@ def main():
         # ----- こうかとんの移動 -----
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]  # 横方向, 縦方向
-        # if key_lst[pg.K_UP]:
-        #     sum_mv[1] -= 5
-        # if key_lst[pg.K_DOWN]:
-        #     sum_mv[1] += 5
-        # if key_lst[pg.K_LEFT]:
-        #     sum_mv[0] -= 5
-        # if key_lst[pg.K_RIGHT]:
-        #     sum_mv[0] += 5
         for key, tpl in DELTA.items():
             if key_lst[key]:
                 sum_mv[0] += tpl[0]  # 横方向
                 sum_mv[1] += tpl[1]  # 縦方向
         kk_rct.move_ip(sum_mv)
         # こうかとんの向きを変える
-        kk_img = facing(sum_mv)
+        if sum_mv != [0, 0]:
+            kk_img = facing(sum_mv)
         if sum_mv[0] == 5:  # 右側を向いていたら左右反転させる
             kk_img = pg.transform.flip(kk_img, True, False)
         # こうかとんが画面外へ行かないようにする
@@ -150,12 +144,6 @@ def main():
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
             # 直前のmove_ipを打ち消す
         screen.blit(kk_img, kk_rct)
-        # ----- 爆弾の移動 -----
-        # avx = vx*bb_accs[min(tmr//500, 9)]
-        # avy = vy*bb_accs[min(tmr//500, 9)]
-        # bb_img = bb_imgs[min(tmr//500, 9)]
-        # bb_rct.move_ip(avx, avy)
-        bb_rct.move_ip(vx, vy)
 
         # 爆弾を画面の端でバウンドさせる
         (w, h) = check_bound(bb_rct)
@@ -163,6 +151,12 @@ def main():
             vx *= -1
         if not h:
             vy *= -1
+        # ----- 爆弾の移動 -----
+        avx = vx*bb_accs[min(tmr//500, 9)]
+        avy = vy*bb_accs[min(tmr//500, 9)]
+        bb_img = bb_imgs[min(tmr//500, 9)]
+        bb_rct.move_ip(avx, avy)
+        # bb_rct.move_ip(vx, vy)
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
